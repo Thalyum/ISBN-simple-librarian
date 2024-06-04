@@ -6,15 +6,18 @@ use std::{
     thread,
 };
 use tiny_http::Server;
+
 // internal
 use http::Method;
 use library::Library;
+use tui::App;
 
 mod book;
 mod collection;
 mod error;
 mod http;
 mod library;
+mod tui;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -55,5 +58,7 @@ fn main() -> Result<()> {
         guards.push(guard);
     }
 
-    loop {}
+    let mut terminal = tui::init()?;
+    App::with_library(library).run(&mut terminal)?;
+    tui::restore()
 }

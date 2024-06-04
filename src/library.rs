@@ -7,7 +7,7 @@ const FIRST_COLLECTION_ID: i32 = 1;
 #[derive(Debug)]
 pub struct Library {
     collections: Vec<Collection>,
-    books: Vec<Arc<Book>>,
+    pub books: Vec<Arc<Book>>,
     next_id: i32,
 }
 
@@ -21,11 +21,17 @@ impl Library {
     }
 
     fn add_book(&mut self, book: Book) {
+        // println!("Adding book '{}' to library", book.isbn());
         let book = Arc::new(book);
         self.books.push(book)
     }
 
     fn add_book_with_collection(&mut self, book: Book, collection_id: i32) -> Result<(), Error> {
+        // println!(
+        //     "Adding book '{}' to library in collection '{}",
+        //     book.isbn(),
+        //     collection_id
+        // );
         let book = Arc::new(book);
         self.books.push(book.clone());
         self.collections
@@ -40,6 +46,7 @@ impl Library {
         self.collections
             .push(Collection::new(new_id, name.to_string()));
         self.next_id += 1;
+        // println!("Creating new collection with name '{name}' ({new_id})");
         new_id
     }
 
