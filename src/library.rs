@@ -2,6 +2,8 @@ use std::sync::Arc;
 
 use crate::{book::Book, collection::Collection, error::Error};
 
+const FIRST_COLLECTION_ID: i32 = 1;
+
 #[derive(Debug)]
 pub struct Library {
     collections: Vec<Collection>,
@@ -14,7 +16,7 @@ impl Library {
         Self {
             collections: vec![],
             books: vec![],
-            next_id: 0,
+            next_id: FIRST_COLLECTION_ID,
         }
     }
 

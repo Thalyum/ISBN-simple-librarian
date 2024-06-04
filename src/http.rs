@@ -38,6 +38,14 @@ impl Method {
             rq.remote_addr().unwrap()
         );
         let ParsedUrl(endpoint, queries) = parse_url(url);
+
+        // if any query key has not parameter => bad format: error 400
+        if queries.iter().any(|(_, v)| v.is_none()) {
+            let response = Response::empty(400);
+            rq.respond(response)?;
+            return Ok(());
+        }
+
         match endpoint.as_str() {
             "/book" => {
                 match self {
@@ -111,20 +119,23 @@ impl Method {
                     let response = Response::empty(400);
                     rq.respond(response)?;
                 } else {
-                    match library.lock().unwrap().find_collection_by_name(name) {
+                    let found = library.lock().unwrap().find_collection_by_name(name);
+                    match found {
                         Some(id) => {
                             let response = Response::from_string(format!("{}", id));
                             rq.respond(response)?;
                         }
                         None => {
-                            if queries.get("create").is_some() {
+                            if matches!(queries.get("create"), Some(&Some(ref a)) if a == "true") {
                                 // create new collection with name
                                 let new_id = library.lock().unwrap().new_collection(name);
                                 let response = Response::from_string(format!("{}", new_id));
                                 rq.respond(response)?;
                             } else {
+                                let err_msg = format!("Collection named '{name}' does not exist, and will not create it");
+                                println!("{}", err_msg);
                                 // collection does not exist: Error 404
-                                let response = Response::empty(404);
+                                let response = Response::from_string(err_msg).with_status_code(404);
                                 rq.respond(response)?;
                             }
                         }
